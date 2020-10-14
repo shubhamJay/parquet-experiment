@@ -1,12 +1,15 @@
 package exp.api
 
+import java.util.UUID
+
+import csw.EventFactory
 import csw.params.core.formats.ParamCodecs._
-import csw.params.core.generics.Parameter
-import csw.params.events.{EventName, SystemEvent}
-import csw.prefix.models.Prefix
+import csw.params.events.SystemEvent
 import io.bullet.borer.Json
 
 case class SystemEventRecord(
+    exposureId: String,
+    obsEventName: String,
     eventId: String,
     source: String,
     eventName: String,
@@ -14,18 +17,15 @@ case class SystemEventRecord(
     seconds: Long,
     nanos: Long,
     paramSet: String
-) {
-  def toEvent: SystemEvent =
-    SystemEvent(
-      Prefix(source),
-      EventName(eventName),
-      Json.decode(paramSet.getBytes()).to[Set[Parameter[_]]].value
-    )
-}
+)
 
 object SystemEventRecord {
-  def from(systemEvent: SystemEvent): SystemEventRecord =
+  def generate(): SystemEventRecord = generate(0, "startEvent", EventFactory.generateEvent())
+
+  def generate(exposureId: Long, obsEventName: String, systemEvent: SystemEvent): SystemEventRecord = {
     SystemEventRecord(
+      exposureId.toString,
+      obsEventName,
       systemEvent.eventId.id,
       systemEvent.source.toString(),
       systemEvent.eventName.name,
@@ -34,4 +34,5 @@ object SystemEventRecord {
       systemEvent.eventTime.value.getNano,
       Json.encode(systemEvent.paramSet).toUtf8String
     )
+  }
 }

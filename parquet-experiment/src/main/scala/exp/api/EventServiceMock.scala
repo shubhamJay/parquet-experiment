@@ -8,19 +8,25 @@ import scala.concurrent.duration.DurationInt
 
 object EventServiceMock {
   def eventStream(): Source[SystemEventRecord, NotUsed] = {
-    Source
-      .repeat(())
-      .throttle(10, 1.millis)
-      .statefulMapConcat { () =>
-        var count = 0
-        _ =>
-          count += 1
-          List(SystemEventRecord.from(EventFactory.generateEvent(count)))
+    val eventIds  = Iterator.from(1)
+    val exposures =
+      Iterator.from(1).flatMap { exposureId =>
+        Iterator("startEvent", "endEvent").flatMap { obsEventName =>
+          List.fill(5000)((exposureId, obsEventName))
+        }
       }
-      .take(100000)
+
+    Source
+      .fromIterator(() => exposures.zip(eventIds))
+      .throttle(10, 1.millis)
+      .map {
+        case ((exposureId, obsEventName), eventId) =>
+          SystemEventRecord.generate(exposureId, obsEventName, EventFactory.generateEvent(eventId))
+      }
+      .take(120000)
   }
 
   def captureSnapshot(): Seq[SystemEventRecord] = {
-    (1 to 2000).map(_ => SystemEventRecord.from(EventFactory.generateEvent()))
+    (1 to 2000).map(_ => SystemEventRecord.generate())
   }
 }
