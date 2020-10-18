@@ -5,7 +5,7 @@ import exp.api.{Constants, EventServiceMock, SystemEventRecord}
 
 import scala.concurrent.blocking
 
-object BatchJob {
+object ParquetBatchJob {
   val obsEventIds = Seq(
     "obs-event-1",
     "obs-event-2",

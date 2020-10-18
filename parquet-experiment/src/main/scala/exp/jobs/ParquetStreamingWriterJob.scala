@@ -14,7 +14,7 @@ import org.apache.parquet.hadoop.metadata.CompressionCodecName
 import scala.concurrent.duration.DurationInt
 import scala.util.{Failure, Success}
 
-object StreamingWriteJob {
+object ParquetStreamingWriterJob {
   val writeOptions: ParquetWriter.Options = ParquetWriter.Options(
     writeMode = ParquetFileWriter.Mode.CREATE,
     compressionCodecName = CompressionCodecName.SNAPPY,
@@ -42,12 +42,19 @@ object StreamingWriteJob {
           .withPartitionBy("exposureId", "obsEventName")
           .build()
       )
-      .runForeach { eventRecord =>
-        val count = eventRecord.eventId.toInt
-        if (count % 1000 == 0) {
-          println(s"Finished writing $count records *********************")
-        }
+      .statefulMapConcat { () =>
+        var start = System.currentTimeMillis()
+
+        eventRecord =>
+          val count = eventRecord.eventId.toInt
+          if (count % 10000 == 0) {
+            val current = System.currentTimeMillis()
+            println(s"Finished writing items: $count in ${current - start} milliseconds *********************")
+            start = current
+          }
+          List(eventRecord)
       }
+      .runForeach { _ => () }
       .onComplete { x =>
         actorSystem.terminate()
         x match {

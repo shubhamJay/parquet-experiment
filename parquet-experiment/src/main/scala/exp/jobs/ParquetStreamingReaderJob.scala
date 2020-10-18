@@ -2,25 +2,24 @@ package exp.jobs
 
 import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
-import exp.api.{Constants, EventServiceMock, ParquetTable}
+import com.github.mjakubowski84.parquet4s._
+import exp.api.Constants
+import org.apache.hadoop.conf.Configuration
 
 import scala.concurrent.duration.DurationInt
 import scala.util.{Failure, Success}
 
-object StreamingWriteJob2 {
+object ParquetStreamingReaderJob {
   def main(args: Array[String]): Unit = {
     implicit lazy val actorSystem: ActorSystem[Nothing] = ActorSystem(Behaviors.empty, "demo")
-
     import actorSystem.executionContext
 
-    val parquetTable = new ParquetTable(Constants.StreamingDir)
-    parquetTable.delete()
-
-    EventServiceMock
-      .eventStream()
-      .groupedWithin(10000, 2.second)
-      .mapAsync(1)(parquetTable.append)
-      .runForeach(_ => ())
+    ParquetStreams
+      .fromParquet[Projection]
+      .withFilter(Col("exposureId") === "5" && Col("nanos") >= 638299000L && Col("nanos") <= 648299000L)
+      .withOptions(ParquetReader.Options(hadoopConf = new Configuration()))
+      .read(Constants.StreamingDir)
+      .runForeach(println)
       .onComplete { x =>
         actorSystem.terminate()
         x match {
@@ -30,3 +29,5 @@ object StreamingWriteJob2 {
       }
   }
 }
+
+case class Projection(exposureId: String, obsEventName: String, eventId: String)

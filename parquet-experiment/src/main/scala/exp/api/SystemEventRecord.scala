@@ -1,7 +1,5 @@
 package exp.api
 
-import java.util.UUID
-
 import csw.EventFactory
 import csw.params.core.formats.ParamCodecs._
 import csw.params.events.SystemEvent
