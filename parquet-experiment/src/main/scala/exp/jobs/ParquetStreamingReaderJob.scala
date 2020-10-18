@@ -6,7 +6,6 @@ import com.github.mjakubowski84.parquet4s._
 import exp.api.Constants
 import org.apache.hadoop.conf.Configuration
 
-import scala.concurrent.duration.DurationInt
 import scala.util.{Failure, Success}
 
 object ParquetStreamingReaderJob {
@@ -16,7 +15,8 @@ object ParquetStreamingReaderJob {
 
     ParquetStreams
       .fromParquet[Projection]
-      .withFilter(Col("exposureId") === "5" && Col("nanos") >= 638299000L && Col("nanos") <= 648299000L)
+      .withProjection
+      .withFilter(Col("exposureId") === "6" && Col("nanos") >= 638299000L && Col("nanos") <= 638399000L)
       .withOptions(ParquetReader.Options(hadoopConf = new Configuration()))
       .read(Constants.StreamingDir)
       .runForeach(println)
@@ -30,4 +30,4 @@ object ParquetStreamingReaderJob {
   }
 }
 
-case class Projection(exposureId: String, obsEventName: String, eventId: String)
+case class Projection(eventId: String, nanos: Long, eventTime: String)
