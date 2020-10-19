@@ -16,7 +16,11 @@ object ParquetStreamingReaderJob {
     ParquetStreams
       .fromParquet[Projection]
       .withProjection
-      .withFilter(Col("exposureId") === "6" && Col("nanos") >= 638299000L && Col("nanos") <= 638399000L)
+      .withFilter(
+        (Col("exposureId") === "2" || Col("exposureId") === "6") &&
+          Col("nanos") >= 638299000L &&
+          Col("nanos") <= 638499000L
+      )
       .withOptions(ParquetReader.Options(hadoopConf = new Configuration()))
       .read(Constants.StreamingDir)
       .runForeach(println)

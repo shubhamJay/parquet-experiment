@@ -1,26 +1,38 @@
 package exp.jobs
 
+import java.io.File
+
 import com.github.mjakubowski84.parquet4s.{ParquetReader, ParquetWriter}
+import csw.EventFactory
 import exp.api.{Constants, EventServiceMock, SystemEventRecord}
+import org.apache.commons.io.FileUtils
 
 import scala.concurrent.blocking
 
 object ParquetBatchJob {
-  val obsEventIds = Seq(
-    "obs-event-1",
-    "obs-event-2",
-    "obs-event-3"
-  )
+  val obsEventIds: Seq[String] = (1 to 10).map(x => s"obs-event-$x")
 
   def main(args: Array[String]): Unit = {
-    obsEventIds.foreach { obsEventId =>
-      println(s"writing snapshot captured for observe-event:$obsEventId ****************************")
-      write(obsEventId, EventServiceMock.captureSnapshot())
+
+    val table = new File(Constants.BatchingDir)
+
+    if (table.exists()) {
+      FileUtils.deleteDirectory(table)
+      println("deleted the existing table")
     }
 
     obsEventIds.foreach { obsEventId =>
-      println(s"reading snapshot captured for observe-event:$obsEventId ****************************")
+      val start   = System.currentTimeMillis()
+      write(obsEventId, EventServiceMock.captureSnapshot())
+      val current = System.currentTimeMillis()
+      println(s"Wrote the snapshot for observe-event:$obsEventId in ${current - start} millis ****************************")
+    }
+
+    obsEventIds.foreach { obsEventId =>
+      val start   = System.currentTimeMillis()
       read(obsEventId)
+      val current = System.currentTimeMillis()
+      println(s"Read the snapshot for observe-event:$obsEventId in ${current - start} millis ****************************")
     }
   }
 
@@ -32,7 +44,7 @@ object ParquetBatchJob {
   def read(batchId: String): Unit = {
     val parquetIterable = ParquetReader.read[SystemEventRecord](s"${Constants.BatchingDir}/$batchId.parquet")
     try {
-      parquetIterable.foreach(println)
+      parquetIterable.map(EventFactory.fromRecord).foreach(_ => ())
     } finally parquetIterable.close()
   }
 
