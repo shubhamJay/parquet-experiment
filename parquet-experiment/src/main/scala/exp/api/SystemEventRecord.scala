@@ -18,8 +18,6 @@ case class SystemEventRecord(
 )
 
 object SystemEventRecord {
-  def generate(): SystemEventRecord = generate(0, "startEvent", EventFactory.generateEvent())
-
   def generate(exposureId: Long, obsEventName: String, systemEvent: SystemEvent): SystemEventRecord = {
     SystemEventRecord(
       exposureId.toString,
