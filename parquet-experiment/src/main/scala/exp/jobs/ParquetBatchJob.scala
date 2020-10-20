@@ -25,14 +25,14 @@ object ParquetBatchJob {
       val start   = System.currentTimeMillis()
       write(obsEventId, EventServiceMock.captureSnapshot(0, "startEvent"))
       val current = System.currentTimeMillis()
-      println(s"Wrote the snapshot for observe-event:$obsEventId in ${current - start} millis ****************************")
+      println(s"Wrote the snapshot for observe-event:$obsEventId in ${current - start} millis >>>>>>>>>>>>>>>>")
     }
 
     obsEventIds.foreach { obsEventId =>
       val start   = System.currentTimeMillis()
       read(obsEventId)
       val current = System.currentTimeMillis()
-      println(s"Read the snapshot for observe-event:$obsEventId in ${current - start} millis ****************************")
+      println(s"Read the snapshot for observe-event:$obsEventId in ${current - start} millis <<<<<<<<<<<<<<<<<")
     }
   }
 

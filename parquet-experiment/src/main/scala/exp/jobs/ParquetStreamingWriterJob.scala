@@ -49,12 +49,12 @@ object ParquetStreamingWriterJob {
           val count = eventRecord.eventId.toInt
           if (count % 10000 == 0) {
             val current = System.currentTimeMillis()
-            println(s"Finished writing items: $count in ${current - start} milliseconds *********************")
+            println(s"Finished writing items: $count in ${current - start} milliseconds >>>>>>>>>>>>>>>>>>>>")
             start = current
           }
           List(eventRecord)
       }
-      .runForeach { _ => () }
+      .run()
       .onComplete { x =>
         actorSystem.terminate()
         x match {

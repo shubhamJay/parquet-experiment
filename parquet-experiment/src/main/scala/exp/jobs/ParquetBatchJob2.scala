@@ -5,8 +5,11 @@ import java.io.File
 import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
 import akka.stream.scaladsl.Source
+import csw.params.core.generics.Parameter
 import exp.api.{Constants, EventServiceMock}
+import io.bullet.borer.Json
 import org.apache.commons.io.FileUtils
+import csw.params.core.formats.ParamCodecs._
 
 import scala.util.{Failure, Success}
 
@@ -34,7 +37,7 @@ object ParquetBatchJob2 {
             val start = System.currentTimeMillis()
             parquetSnapshotIo.write(EventServiceMock.captureSnapshot(expId, obsName)).map { _ =>
               val current = System.currentTimeMillis()
-              println(s"Finished writing items in ${current - start} milliseconds *********************")
+              println(s"Finished writing items in ${current - start} milliseconds >>>>>>>>>>>>>>>>>>")
             }
           }
         }
@@ -46,8 +49,9 @@ object ParquetBatchJob2 {
         .mapAsync(1) { expId =>
           val start = System.currentTimeMillis()
           parquetSnapshotIo.read[BatchProjection](expId.toString).map { batch =>
+            batch.foreach(x => Json.decode(x.paramSet.getBytes()).to[Set[Parameter[_]]].value)
             val current = System.currentTimeMillis()
-            println(s"Finished reading ${batch.length} items in ${current - start} milliseconds *********************")
+            println(s"Finished reading ${batch.length} items in ${current - start} milliseconds <<<<<<<<<<<<<<<<<")
           }
         }
         .run()

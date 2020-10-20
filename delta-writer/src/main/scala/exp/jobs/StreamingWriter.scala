@@ -17,6 +17,6 @@ class StreamingWriter(sparkTable: SparkTable)(implicit actorSystem: ActorSystem[
       .eventStream()
       .groupedWithin(10000, 5.seconds)
       .mapAsync(1)(sparkTable.append)
-      .runForeach(_ => ())
+      .run()
   }
 }

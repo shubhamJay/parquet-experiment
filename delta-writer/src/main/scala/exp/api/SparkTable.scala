@@ -29,7 +29,7 @@ class SparkTable(spark: SparkSession, tablePath: String, format: String) {
         val start   = System.currentTimeMillis()
         batch.toDF().write.mode("append").partitionBy("exposureId", "obsEventName").format(format).save(fullPath)
         val current = System.currentTimeMillis()
-        println(s"Finished writing items: ${batch.length} in ${current - start} milliseconds *********************")
+        println(s"Finished writing items: ${batch.length} in ${current - start} milliseconds >>>>>>>>>>>>>>>>>>")
       }
     }
 }
