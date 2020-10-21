@@ -9,7 +9,7 @@ import org.apache.parquet.hadoop.metadata.CompressionCodecName
 
 import scala.concurrent.Future
 
-class ParquetSnapshotIo1(path: String)(implicit actorSystem: ActorSystem[_]) {
+class ParquetSnapshotIO(path: String)(implicit actorSystem: ActorSystem[_]) {
 
   def write(snapshot: Seq[SystemEventRecord]): Future[Done] = {
     Source(snapshot)
