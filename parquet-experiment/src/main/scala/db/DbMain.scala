@@ -30,7 +30,7 @@ object DbMain {
       obsEventNames.foreach { obsName =>
         val start                            = System.currentTimeMillis()
         val records: Seq[SystemEventRecord2] = EventServiceMock.captureSnapshot2(expId, obsName)
-        Await.result(dbIO.write(records), 1.seconds)
+        dbIO.batchWrite(records)
         val current                          = System.currentTimeMillis()
         println(s"Finished writing items in ${current - start} milliseconds >>>>>>>>>>>>>>>>>>")
       }
@@ -41,7 +41,7 @@ object DbMain {
       val paramSets = dbIO.read(expId.toString)
       paramSets.foreach(x => Cbor.decode(x).to[Set[Parameter[_]]].value)
       val current   = System.currentTimeMillis()
-      println(s"Finished reading items in ${current - start} milliseconds <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
+      println(s"Finished reading ${paramSets.length} items in ${current - start} milliseconds <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
     }
 
     session.close()

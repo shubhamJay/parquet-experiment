@@ -34,7 +34,7 @@ class DbIO(implicit session: AutoSession, actorSystem: ActorSystem[_]) {
   }
 
   def write(records: Seq[SystemEventRecord2]): Future[Done] = {
-    Source(records).mapAsync(8)(write).run()
+    Source(records).mapAsync(1)(write).run()
   }
 
   def write(record: SystemEventRecord2): Future[Int] = {
@@ -66,6 +66,35 @@ class DbIO(implicit session: AutoSession, actorSystem: ActorSystem[_]) {
        |""".stripMargin.update()()
       }
     }
+  }
+
+  def batchWrite(records: Seq[SystemEventRecord2]): Unit = {
+    val entries: Seq[Seq[Any]] = {
+      records.map(r => Seq(r.exposureId, r.obsEventName, r.eventId, r.source, r.eventName, r.eventTime, r.seconds, r.nanos, r.paramSet))
+    }
+    sql"""
+       |insert into events (
+       |  exposureid,
+       |  obseventname,
+       |  eventid,
+       |  source,
+       |  eventname,
+       |  eventtime,
+       |  seconds,
+       |  nanos,
+       |  paramset
+       |) values (
+       |  ?,
+       |  ?,
+       |  ?,
+       |  ?,
+       |  ?,
+       |  ?,
+       |  ?,
+       |  ?,
+       |  ?
+       |)
+       |""".stripMargin.batch(entries: _*)()
   }
 
   def read(exposureId: String)(implicit session: AutoSession): List[Array[Byte]] = {
