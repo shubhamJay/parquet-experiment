@@ -1,10 +1,10 @@
 package exp.api
 
-import csw.params.core.formats.ParamCodecs._
 import csw.params.events.SystemEvent
-import io.bullet.borer.Json
+import io.bullet.borer.{Cbor, Json}
+import csw.params.core.formats.ParamCodecs._
 
-case class SystemEventRecord(
+case class SystemEventRecord2(
     exposureId: String,
     obsEventName: String,
     eventId: String,
@@ -13,12 +13,12 @@ case class SystemEventRecord(
     eventTime: String,
     seconds: Long,
     nanos: Long,
-    paramSet: String
+    paramSet: Array[Byte]
 )
 
-object SystemEventRecord {
-  def generate(exposureId: Long, obsEventName: String, systemEvent: SystemEvent): SystemEventRecord = {
-    SystemEventRecord(
+object SystemEventRecord2 {
+  def generate(exposureId: Long, obsEventName: String, systemEvent: SystemEvent): SystemEventRecord2 = {
+    SystemEventRecord2(
       exposureId.toString,
       obsEventName,
       systemEvent.eventId.id,
@@ -27,7 +27,7 @@ object SystemEventRecord {
       systemEvent.eventTime.value.toString,
       systemEvent.eventTime.value.getEpochSecond,
       systemEvent.eventTime.value.getNano,
-      Json.encode(systemEvent.paramSet).toUtf8String
+      Cbor.encode(systemEvent.paramSet).toByteArray
     )
   }
 }

@@ -3,8 +3,8 @@ import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
 import csw.params.core.generics.Parameter
 import csw.params.core.formats.ParamCodecs._
-import exp.api.{EventServiceMock, SystemEventRecord}
-import io.bullet.borer.Json
+import exp.api.{EventServiceMock, SystemEventRecord, SystemEventRecord2}
+import io.bullet.borer.{Cbor, Json}
 import scalikejdbc._
 
 import scala.concurrent.Await
@@ -28,10 +28,10 @@ object DbMain {
 
     exposureIds.foreach { expId =>
       obsEventNames.foreach { obsName =>
-        val start                           = System.currentTimeMillis()
-        val records: Seq[SystemEventRecord] = EventServiceMock.captureSnapshot(expId, obsName)
+        val start                            = System.currentTimeMillis()
+        val records: Seq[SystemEventRecord2] = EventServiceMock.captureSnapshot2(expId, obsName)
         Await.result(dbIO.write(records), 1.seconds)
-        val current                         = System.currentTimeMillis()
+        val current                          = System.currentTimeMillis()
         println(s"Finished writing items in ${current - start} milliseconds >>>>>>>>>>>>>>>>>>")
       }
     }
@@ -39,9 +39,9 @@ object DbMain {
     exposureIds.foreach { expId =>
       val start     = System.currentTimeMillis()
       val paramSets = dbIO.read(expId.toString)
-      paramSets.foreach(x => Json.decode(x.getBytes()).to[Set[Parameter[_]]].value)
+      paramSets.foreach(x => Cbor.decode(x).to[Set[Parameter[_]]].value)
       val current   = System.currentTimeMillis()
-      println(s"Finished reading items in ${current - start} milliseconds >>>>>>>>>>>>>>>>>>")
+      println(s"Finished reading items in ${current - start} milliseconds <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
     }
 
     session.close()
