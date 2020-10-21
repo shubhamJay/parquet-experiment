@@ -10,7 +10,10 @@ lazy val `parquet-experiment` = project
       "com.github.tmtsoftware.csw" %% "csw-event-client"         % "04eaee2",
       "com.github.mjakubowski84"   %% "parquet4s-akka"           % "1.6.0",
       "org.apache.hadoop"           % "hadoop-client"            % "3.3.0",
-      "com.lightbend.akka"         %% "akka-stream-alpakka-file" % "2.0.2"
+      "com.lightbend.akka"         %% "akka-stream-alpakka-file" % "2.0.2",
+      "org.scalikejdbc"            %% "scalikejdbc"              % "3.5.0",
+      "org.postgresql"              % "postgresql"               % "42.2.16",
+      "ch.qos.logback"              % "logback-classic"          % "1.2.3"
     ),
     scalacOptions ++= Seq(
       "-encoding",
