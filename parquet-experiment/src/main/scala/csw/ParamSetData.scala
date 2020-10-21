@@ -27,6 +27,8 @@ object ParamSetData {
       .make("UTCTimeKey")
       .set(UTCTime(Instant.ofEpochMilli(0)), UTCTime(Instant.parse("2017-09-04T19:00:00.123456789Z")))
 
+  private def p1000 = UTCTimeKey.make("UTCTimeKey1").set(UTCTime.now())
+
   private val p10 =
     TAITimeKey
       .make("TAITimeKey")
@@ -62,7 +64,7 @@ object ParamSetData {
   private val altAzCoord       = AltAzCoord(Tag("BASE"), 301.degree, 42.5.degree)
   private val p27              = CoordKey.make("CoordKey").set(eqCoord, solarSystemCoord, minorPlanetCoord, cometCoord, altAzCoord)
 
-  val paramSet: Set[Parameter[_]] =
+  def paramSet: Set[Parameter[_]] =
     Set(
       p1,
       p2,
@@ -90,6 +92,7 @@ object ParamSetData {
       p24,
       p25,
       p26,
-      p27
+      p27,
+      p1000
     )
 }

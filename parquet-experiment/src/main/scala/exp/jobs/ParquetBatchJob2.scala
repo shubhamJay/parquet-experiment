@@ -14,7 +14,7 @@ import csw.params.core.formats.ParamCodecs._
 import scala.util.{Failure, Success}
 
 object ParquetBatchJob2 {
-  val exposureIds: Seq[Int]      = (1 to 5)
+  val exposureIds: Seq[Int]      = (1 to 10)
   val obsEventNames: Seq[String] = List("eventStart", "eventEnd")
 
   def main(args: Array[String]): Unit = {

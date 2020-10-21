@@ -9,7 +9,7 @@ object CodecPerformance {
 
   def main(args: Array[String]): Unit = {
     (1 to 10).foreach { x =>
-      val events: Seq[Event] = (1 to 4000).map(x => EventFactory.generateEvent())
+      val events: Seq[Event] = (1 to 4600).map(x => EventFactory.generateEvent())
       val start              = System.currentTimeMillis()
       val string             = Json.encode(events).toByteArray
       Json.decode(string).to[Seq[Event]].value
