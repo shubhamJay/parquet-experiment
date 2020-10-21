@@ -28,7 +28,7 @@ object ParquetBatchJob2 {
       println("deleted the existing table")
     }
 
-    val parquetSnapshotIo = new ParquetSnapshotIo(Constants.BatchingDir)
+    val parquetSnapshotIo = new ParquetSnapshotIo1(Constants.BatchingDir)
 
     def write() = {
       Source(exposureIds)
