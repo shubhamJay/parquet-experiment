@@ -27,8 +27,6 @@ object ParamSetData {
       .make("UTCTimeKey")
       .set(UTCTime(Instant.ofEpochMilli(0)), UTCTime(Instant.parse("2017-09-04T19:00:00.123456789Z")))
 
-  private def p1000 = UTCTimeKey.make("UTCTimeKey1").set(UTCTime.now())
-
   private val p10 =
     TAITimeKey
       .make("TAITimeKey")
@@ -54,7 +52,7 @@ object ParamSetData {
   private val p24 = ChoiceKey.make("ChoiceKey", NoUnits, Choices.from("First", "Second")).set("First", "Second")
   // Struct Key
   private val p25 = StructKey.make("StructKey").set(Struct(Set(p1, p2)))
-  private val p26 = StringKey.make("StringKey").set("Str1", "Str2")
+  private val p26 = StringKey.make("StringKey").set("1" * 2000)
 
   private val pm               = ProperMotion(0.5, 2.33)
   private val eqCoord          = EqCoord(ra = "12:13:14.15", dec = "-30:31:32.3", frame = FK5, pmx = pm.pmx, pmy = pm.pmy)
@@ -64,7 +62,7 @@ object ParamSetData {
   private val altAzCoord       = AltAzCoord(Tag("BASE"), 301.degree, 42.5.degree)
   private val p27              = CoordKey.make("CoordKey").set(eqCoord, solarSystemCoord, minorPlanetCoord, cometCoord, altAzCoord)
 
-  def paramSet: Set[Parameter[_]] =
+  private def paramSet0: Set[Parameter[_]] =
     Set(
       p1,
       p2,
@@ -95,4 +93,8 @@ object ParamSetData {
       p27,
       p1000
     )
+
+  private def p1000 = UTCTimeKey.make("UTCTimeKey1").set(UTCTime.now())
+
+  def paramSet: Set[Parameter[_]] = paramSet0 //++ Set(StructKey.make("StructKey1").set(Struct(paramSet0)))
 }

@@ -13,11 +13,11 @@ import scala.concurrent.duration.DurationInt
 object DbMain {
 
   val exposureIds: Seq[Int]      = (1 to 10)
-  val obsEventNames: Seq[String] = List("eventStart", "eventEnd")
+  val obsEventNames: Seq[String] = List("eventStart", "midEvent","eventEnd")
 
   def main(args: Array[String]): Unit = {
     Class.forName("org.postgresql.Driver")
-    ConnectionPool.singleton("jdbc:postgresql://localhost:5432/postgres", "mushtaqahmed", "")
+    ConnectionPool.singleton("jdbc:postgresql://localhost:5432/postgres", "postgres", "")
 
     implicit val session: AutoSession              = AutoSession
     implicit val actorSystem: ActorSystem[Nothing] = ActorSystem(Behaviors.empty, "demo")
@@ -29,7 +29,7 @@ object DbMain {
     exposureIds.foreach { expId =>
       obsEventNames.foreach { obsName =>
         val start                            = System.currentTimeMillis()
-        val records: Seq[SystemEventRecord2] = EventServiceMock.captureSnapshot2(expId, obsName)
+        val records = EventServiceMock.captureSnapshot2(expId, obsName)
         dbIO.batchWrite(records)
         val current                          = System.currentTimeMillis()
         println(s"Finished writing items in ${current - start} milliseconds >>>>>>>>>>>>>>>>>>")
@@ -39,7 +39,7 @@ object DbMain {
     exposureIds.foreach { expId =>
       val start     = System.currentTimeMillis()
       val paramSets = dbIO.read(expId.toString)
-      paramSets.foreach(x => Cbor.decode(x).to[Set[Parameter[_]]].value)
+      paramSets.foreach(x => Json.decode(x).to[Set[Parameter[_]]].value)
       val current   = System.currentTimeMillis()
       println(s"Finished reading ${paramSets.length} items in ${current - start} milliseconds <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<")
     }

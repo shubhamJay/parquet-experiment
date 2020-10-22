@@ -27,7 +27,7 @@ object SystemEventRecord2 {
       systemEvent.eventTime.value.toString,
       systemEvent.eventTime.value.getEpochSecond,
       systemEvent.eventTime.value.getNano,
-      Cbor.encode(systemEvent.paramSet).toByteArray
+      Json.encode(systemEvent.paramSet).toByteArray
     )
   }
 }

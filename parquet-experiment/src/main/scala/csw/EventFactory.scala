@@ -10,6 +10,8 @@ import csw.time.core.models.UTCTime
 import exp.api.SystemEventRecord
 import io.bullet.borer.Json
 import csw.params.core.formats.ParamCodecs._
+import csw.params.core.generics.KeyType.StringKey
+import csw.prefix.models.Subsystem.ESW
 
 object EventFactory {
   private val prefix    = Prefix("wfos.blue.filter")
@@ -29,4 +31,14 @@ object EventFactory {
       Json.decode(paramSet.getBytes()).to[Set[Parameter[_]]].value
     )
   }
+
+  def addPayload(event: SystemEvent, size: Int): SystemEvent = {
+    val payload = StringKey.make("payloadKey").set("0" * size)
+    event.add(payload)
+  }
+
+  def generateTestEvent(): SystemEvent = {
+    addPayload(SystemEvent(Prefix(ESW, "filter"), EventName("wheel5")), 1024 * 5)
+  }
+
 }

@@ -28,8 +28,6 @@ class DbIO(implicit session: AutoSession, actorSystem: ActorSystem[_]) {
          |    paramset     bytea
          |);
          |
-         |alter table events owner to mushtaqahmed;
-         |
          |""".stripMargin.execute()()
   }
 
