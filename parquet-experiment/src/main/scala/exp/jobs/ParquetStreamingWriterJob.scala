@@ -16,16 +16,24 @@ import scala.util.{Failure, Success}
 
 object ParquetStreamingWriterJob {
   val writeOptions: ParquetWriter.Options = ParquetWriter.Options(
-    writeMode = ParquetFileWriter.Mode.CREATE,
+    writeMode = ParquetFileWriter.Mode.OVERWRITE,
     compressionCodecName = CompressionCodecName.SNAPPY,
-    hadoopConf = new Configuration() // optional hadoopConf
+    hadoopConf = {
+      val dd = new Configuration()
+      dd.set("fs.s3a.endpoint", "http://localhost:9000")
+      dd.set("fs.s3a.access.key", "minioadmin")
+      dd.set("fs.s3a.secret.key", "minioadmin")
+      dd.set("fs.s3a.path.style.access", "true")
+      dd.set("fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem")
+      dd
+    }
   )
 
-  private val file = new File(Constants.StreamingDir)
-  if (file.exists()) {
-    FileUtils.deleteDirectory(file)
-    println("deleted the existing table")
-  }
+//  private val file = new File(Constants.StreamingDir)
+//  if (file.exists()) {
+//    FileUtils.deleteDirectory(file)
+//    println("deleted the existing table")
+//  }
 
   def main(args: Array[String]): Unit = {
     implicit lazy val actorSystem: ActorSystem[Nothing] = ActorSystem(Behaviors.empty, "demo")
@@ -35,8 +43,8 @@ object ParquetStreamingWriterJob {
       .eventStream()
       .via(
         ParquetStreams
-          .viaParquet[SystemEventRecord](Constants.StreamingDir)
-          .withMaxCount(writeOptions.rowGroupSize)
+          .viaParquet(Constants.StreamingS3Dir)
+          .withMaxCount(10000)
           .withMaxDuration(5.seconds)
           .withWriteOptions(writeOptions)
           .withPartitionBy("exposureId", "obsEventName")
@@ -47,7 +55,7 @@ object ParquetStreamingWriterJob {
 
         eventRecord =>
           val count = eventRecord.eventId.toInt
-          if (count % 10000 == 0) {
+          if (count % 100 == 0) {
             val current = System.currentTimeMillis()
             println(s"Finished writing items: $count in ${current - start} milliseconds >>>>>>>>>>>>>>>>>>>>")
             start = current

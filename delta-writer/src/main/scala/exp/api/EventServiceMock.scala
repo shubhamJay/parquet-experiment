@@ -17,12 +17,12 @@ object EventServiceMock {
 
     Source
       .fromIterator(() => exposures.zip(eventIds))
-      .throttle(10, 1.millis)
+      .throttle(1, 1.millis)
       .map {
         case ((exposureId, obsEventName), eventId) =>
           SystemEventRecord.generate(exposureId, obsEventName, eventId.toString)
       }
-      .take(120000)
+      .take(22000)
   }
 
   def captureSnapshot(): Seq[SystemEventRecord] = {

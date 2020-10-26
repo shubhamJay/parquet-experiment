@@ -14,10 +14,16 @@ object SparkSqlStreamingWriterJob {
     val spark = SparkSession
       .builder()
       .appName(getClass.getSimpleName)
+      .config("spark.hadoop.fs.s3a.endpoint", "http://127.0.0.1:9000")
+      .config("spark.hadoop.fs.s3a.access.key", "minioadmin")
+      .config("spark.hadoop.fs.s3a.secret.key", "minioadmin")
+      .config("spark.hadoop.fs.s3a.path.style.access", "true")
+      .config("spark.hadoop.fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem")
       .master("local[*]")
       .getOrCreate()
 
-    val streamingWriter = new StreamingWriter(new SparkTable(spark, "target/data/spark-sql", "parquet"))
+//    val streamingWriter = new StreamingWriter(new SparkTable(spark, "target/data/spark-sql", "parquet"))
+    val streamingWriter = new StreamingWriter(new SparkTable(spark, "s3a://bucket1/target/data/spark-sql", "parquet"))
 
     import actorSystem.executionContext
 
