@@ -25,19 +25,22 @@ object ParquetToDeltaEventsJob {
     import spark.implicits._
 
     val dataFrame = spark.readStream
-      .format("delta")
-//      .schema(Encoders.product[SystemEventRecord].schema)
+      .format("parquet")
+      .schema(Encoders.product[SystemEventRecord].schema)
+      .load("target/data/parquet-streams")
 //      .load("hdfs://localhost:8020/target/data/parquet-streams")
-      .load("s3a://bucket1/target/data/delta-lake")
+//      .load("s3a://bucket1/target/data/delta-lake")
 
     val query = dataFrame.writeStream
       .format("delta")
       .partitionBy("exposureId", "obsEventName")
+      .option("checkpointLocation", "target/data/cp/backup")
 //      .option("checkpointLocation", "hdfs://localhost:8020/target/data/cp/backup")
-      .option("checkpointLocation", "s3a://bucket1/target/data/cp/backup")
+//      .option("checkpointLocation", "s3a://bucket1/target/data/cp/backup")
       .trigger(Trigger.ProcessingTime(1.seconds))
+      .start("target/data/delta-events-backup")
 //      .start("hdfs://localhost:8020/target/data/delta-events-backup")
-      .start("s3a://bucket1/target/data/delta-events-backup")
+//      .start("s3a://bucket1/target/data/delta-events-backup")
 
     query.awaitTermination()
   }

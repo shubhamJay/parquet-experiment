@@ -16,7 +16,7 @@ import scala.util.{Failure, Success}
 
 object ParquetStreamingWriterJob {
   val writeOptions: ParquetWriter.Options = ParquetWriter.Options(
-    writeMode = ParquetFileWriter.Mode.OVERWRITE,
+    writeMode = ParquetFileWriter.Mode.CREATE,
     compressionCodecName = CompressionCodecName.SNAPPY,
     hadoopConf = {
       val dd = new Configuration()
@@ -43,7 +43,7 @@ object ParquetStreamingWriterJob {
       .eventStream()
       .via(
         ParquetStreams
-          .viaParquet(Constants.StreamingS3Dir)
+          .viaParquet(Constants.StreamingDir)
           .withMaxCount(10000)
           .withMaxDuration(5.seconds)
           .withWriteOptions(writeOptions)
