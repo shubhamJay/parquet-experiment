@@ -15,7 +15,7 @@ class StreamingWriter(sparkTable: SparkTable)(implicit actorSystem: ActorSystem[
 
     EventServiceMock
       .eventStream()
-      .groupedWithin(10000, 5.seconds)
+      .groupedWithin(10000, 2.seconds)
       .mapAsync(1)(sparkTable.append)
       .run()
   }

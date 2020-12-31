@@ -1,13 +1,14 @@
 package exp.api
 
-import java.time.Instant
+import java.time.{Instant, LocalDateTime, ZoneOffset}
 import java.util.UUID
 
 import exp.data.ParamSetJson
 
 case class SystemEventRecord(
-    exposureId: Long,
-    obsEventName: String,
+    date: String,
+    hour: Int,
+    minute: Int,
     eventId: String,
     source: String,
     eventName: String,
@@ -18,13 +19,15 @@ case class SystemEventRecord(
 )
 
 object SystemEventRecord {
-  def generate(): SystemEventRecord = generate(0, "startEvent", UUID.randomUUID().toString)
+  def generate(): SystemEventRecord = generate(UUID.randomUUID().toString)
 
-  def generate(exposureId: Long, obsEventName: String, eventId: String): SystemEventRecord = {
+  def generate(eventId: String): SystemEventRecord = {
     val instant = Instant.now()
+    val time    = LocalDateTime.ofInstant(instant, ZoneOffset.UTC)
     SystemEventRecord(
-      exposureId,
-      obsEventName,
+      time.toLocalDate.toString,
+      time.getHour,
+      time.getMinute,
       eventId,
       "wfos.blue.filter",
       "filter wheel",

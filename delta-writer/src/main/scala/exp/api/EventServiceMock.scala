@@ -16,12 +16,9 @@ object EventServiceMock {
       }
 
     Source
-      .fromIterator(() => exposures.zip(eventIds))
-      .throttle(10, 1.millis)
-      .map {
-        case ((exposureId, obsEventName), eventId) =>
-          SystemEventRecord.generate(exposureId, obsEventName, eventId.toString)
-      }
+      .fromIterator(() => eventIds)
+      .throttle(500, 100.millis)
+      .map { eventId => SystemEventRecord.generate(eventId.toString) }
       .take(120000)
   }
 
