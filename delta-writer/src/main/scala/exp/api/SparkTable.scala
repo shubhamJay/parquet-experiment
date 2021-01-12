@@ -27,7 +27,7 @@ class SparkTable(spark: SparkSession, tablePath: String, format: String) {
     Future {
       blocking {
         val start   = System.currentTimeMillis()
-        batch.toDF().write.mode("append").partitionBy("date", "hour", "minute").format(format).save(fullPath)
+        batch.toDF().write.mode("append").partitionBy("date", "hour", "minute").format(format).save(tablePath)
         val current = System.currentTimeMillis()
         println(s"Finished writing items: ${batch.length} in ${current - start} milliseconds >>>>>>>>>>>>>>>>>>")
       }

@@ -14,10 +14,10 @@ object SparkSqlStreamingWriterJob {
     val spark = SparkSession
       .builder()
       .appName(getClass.getSimpleName)
-      .master("local[*]")
+//      .master("local[*]")
       .getOrCreate()
 
-    val streamingWriter = new StreamingWriter(new SparkTable(spark, "target/data/spark-sql", "parquet"))
+    val streamingWriter = new StreamingWriter(new SparkTable(spark, "hdfs://IP:PORT/data/", "parquet"))
 
     import actorSystem.executionContext
 

@@ -14,12 +14,12 @@ object DeltaLakeStreamingWriterJob {
     val spark = SparkSession
       .builder()
       .appName(getClass.getSimpleName)
-      .master("local[*]")
-      .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension")
-      .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog")
+//      .master("local[*]")
+//      .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension")
+//      .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog")
       .getOrCreate()
 
-    val streamingWriter = new StreamingWriter(new SparkTable(spark, "target/data/delta-lake", "delta"))
+    val streamingWriter = new StreamingWriter(new SparkTable(spark, "hdfs://IP:PORT/data/", "delta"))
 
     import actorSystem.executionContext
 
