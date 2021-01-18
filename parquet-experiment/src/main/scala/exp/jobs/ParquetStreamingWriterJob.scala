@@ -1,12 +1,9 @@
 package exp.jobs
 
-import java.io.File
-
 import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
 import com.github.mjakubowski84.parquet4s.{ParquetStreams, ParquetWriter}
-import exp.api.{Constants, EventServiceMock, SystemEventRecord}
-import org.apache.commons.io.FileUtils
+import exp.api.{Constants, EventServiceMock}
 import org.apache.hadoop.conf.Configuration
 import org.apache.parquet.hadoop.ParquetFileWriter
 import org.apache.parquet.hadoop.metadata.CompressionCodecName
@@ -47,7 +44,7 @@ object ParquetStreamingWriterJob {
           .withMaxCount(10000)
           .withMaxDuration(5.seconds)
           .withWriteOptions(writeOptions)
-          .withPartitionBy("exposureId", "obsEventName")
+          .withPartitionBy("date", "hour", "minute")
           .build()
       )
       .statefulMapConcat { () =>

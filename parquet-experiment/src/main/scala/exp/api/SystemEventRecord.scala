@@ -1,12 +1,15 @@
 package exp.api
 
+import java.time.{Instant, LocalDateTime, ZoneOffset}
+
 import csw.params.core.formats.ParamCodecs._
 import csw.params.events.SystemEvent
 import io.bullet.borer.Json
 
 case class SystemEventRecord(
-    exposureId: String,
-    obsEventName: String,
+    date: String,
+    hour: String,
+    minute: String,
     eventId: String,
     source: String,
     eventName: String,
@@ -17,10 +20,13 @@ case class SystemEventRecord(
 )
 
 object SystemEventRecord {
-  def generate(exposureId: Long, obsEventName: String, systemEvent: SystemEvent): SystemEventRecord = {
+  def generate(systemEvent: SystemEvent): SystemEventRecord = {
+    val instant = systemEvent.eventTime.value
+    val time    = LocalDateTime.ofInstant(instant, ZoneOffset.UTC)
     SystemEventRecord(
-      exposureId.toString,
-      obsEventName,
+      time.toLocalDate.toString,
+      time.getHour.toString,
+      time.getMinute.toString,
       systemEvent.eventId.id,
       systemEvent.source.toString(),
       systemEvent.eventName.name,

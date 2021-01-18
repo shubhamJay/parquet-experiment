@@ -3,25 +3,13 @@ package exp.api
 import akka.NotUsed
 import akka.stream.scaladsl.Source
 
-import scala.concurrent.duration.DurationInt
-
 object EventServiceMock {
   def eventStream(): Source[SystemEventRecord, NotUsed] = {
-    val eventIds  = Iterator.from(1)
-    val exposures =
-      Iterator.from(1).flatMap { exposureId =>
-        Iterator("startEvent", "endEvent").flatMap { obsEventName =>
-          List.fill(5000)((exposureId, obsEventName))
-        }
-      }
-
+    val eventIds = Iterator.from(1)
     Source
-      .fromIterator(() => exposures.zip(eventIds))
+      .fromIterator(() => eventIds)
 //      .throttle(1, 1.millis)
-      .map {
-        case ((exposureId, obsEventName), eventId) =>
-          SystemEventRecord.generate(exposureId, obsEventName, eventId.toString)
-      }
+      .map { eventId => SystemEventRecord.generate(eventId.toString) }
       .take(220000)
   }
 
