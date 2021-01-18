@@ -1,14 +1,19 @@
 package exp.jobs
 
-import exp.api.SystemEventRecord
-import org.apache.spark.sql.{Encoders, SparkSession}
+import java.time.{Instant, LocalDateTime, ZoneOffset}
+
+import akka.actor.typed.{ActorSystem, SpawnProtocol}
+import akka.stream.scaladsl.Source
+import org.apache.spark.sql.SparkSession
+
+import scala.concurrent.duration.{DurationInt, FiniteDuration, SECONDS}
 
 object ParquetToDeltaEventsBatchJob {
   def main(args: Array[String]): Unit = {
     val spark = SparkSession
       .builder()
       .appName(getClass.getSimpleName)
-      .master("local[*]")
+      .master("local[1]") //
       .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension")
       .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog")
       .config("spark.delta.logStore.class", "org.apache.spark.sql.delta.storage.S3SingleDriverLogStore")
@@ -19,27 +24,32 @@ object ParquetToDeltaEventsBatchJob {
       .config("spark.hadoop.fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem")
       .getOrCreate()
 
-    val dataFrame = spark.read
-      .format("parquet")
-      .schema(Encoders.product[SystemEventRecord].schema)
-      .load("target/data/parquet-streams")
-//      .load("target/data/parquet-batches")
-//      .load("hdfs://localhost:8020/target/data/parquet-streams")
-//      .load("s3a://bucket1/target/data/delta-lake")
+    def transfer(date: String, hour: Int, minute: Int) = {
+      val dataFrame = spark.read.format("parquet").load(s"target/data/parquet-streams")
 
-    dataFrame.write
-      .format("delta")
-      .partitionBy("exposureId", "obsEventName")
-      .option("checkpointLocation", "target/data/cp/backup")
-      .save("target/data/delta-events-backup-vai-batch")
+      dataFrame
+        .filter(s"date == '$date' and hour == $hour and minute == $minute")
+        .write
+        .mode(org.apache.spark.sql.SaveMode.Append)
+        .partitionBy("date", "hour")
+        .save("target/data/delta-events-backup-vai-batch")
 
-//      .option("checkpointLocation", "hdfs://localhost:8020/target/data/cp/backup")
-//      .option("checkpointLocation", "s3a://bucket1/target/data/cp/backup")
-//      .trigger(Trigger.ProcessingTime(1.seconds))
-//      .start("target/data/delta-events-backup")
-//      .start("hdfs://localhost:8020/target/data/delta-events-backup")
-//      .start("s3a://bucket1/target/data/delta-events-backup")
+      println(s"saved for => $date, $hour, $minute")
+    }
 
-//    query.awaitTermination()
+    val currentTime    = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC)
+    val currentSeconds = currentTime.getSecond
+    val initialDelay   = FiniteDuration(70 - currentSeconds, SECONDS) // to schedule on * minute 10th second.
+
+    implicit val actorSystem: ActorSystem[SpawnProtocol.Command] = ActorSystem.apply(SpawnProtocol(), "transformer")
+
+    Source
+      .tick(initialDelay, 1.minute, ())
+      .map { _ =>
+        val previousMinute = LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC).minusMinutes(1)
+        transfer(previousMinute.toLocalDate.toString, previousMinute.getHour, previousMinute.getMinute)
+      }
+      .run()
   }
+
 }
